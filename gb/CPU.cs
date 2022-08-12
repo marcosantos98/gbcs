@@ -1,6 +1,6 @@
 namespace GB
 {
-    struct Flags
+    public struct Flags
     {
         public bool zero = false;
         public bool substract = false;

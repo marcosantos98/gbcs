@@ -1,6 +1,6 @@
 namespace GB
 {
-    enum RegisterType
+    public enum RegisterType
     {
         A,
         B,
