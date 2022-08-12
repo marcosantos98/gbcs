@@ -1,3 +1,5 @@
+using GB.Types;
+
 namespace GB
 {
     public struct Flags
@@ -10,13 +12,14 @@ namespace GB
         public Flags() { }
     }
 
-    class CPU
+    public class CPU
     {
         public byte[] registers = new byte[8];
         public ushort pc;
         public ushort sp;
         public Flags flags = new Flags();
 
+        public Instruction inst = Instructions.instructions[0x0];
 
         public byte GetU8Register(RegisterType type)
         {

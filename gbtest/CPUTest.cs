@@ -1,5 +1,6 @@
 using Xunit;
 using GB;
+using GB.Types;
 
 namespace GBTest
 {
