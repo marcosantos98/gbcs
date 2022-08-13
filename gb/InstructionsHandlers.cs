@@ -11,14 +11,14 @@ namespace GB
         {
             handlers.Add(InstructionType.ADD, (cpu) =>
             {
-                byte a = cpu.GetU8Register(cpu.inst.rOne);
-                byte b = cpu.GetU8Register(cpu.inst.rTwo);
+                byte a = (byte)cpu.GetRegister(cpu.inst.rOne);
+                byte b = (byte)cpu.GetRegister(cpu.inst.rTwo);
                 (byte, bool) result = OverflowAdd(a, b);
                 cpu.flags.zero = result.Item1 == 0;
                 cpu.flags.substract = false;
                 cpu.flags.carry = result.Item2;
                 cpu.flags.halfCarry = (a & 0xF) + (b & 0xF) > 0xF;
-                cpu.SetU8Register(RegisterType.A, result.Item1);
+                cpu.SetRegister(RegisterType.A, result.Item1);
             });
         }
 

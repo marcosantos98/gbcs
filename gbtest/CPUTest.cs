@@ -17,23 +17,15 @@ namespace GBTest
         [InlineData(RegisterType.F, 0xF2, 0xF2)]
         [InlineData(RegisterType.H, 0xFA, 0xFA)]
         [InlineData(RegisterType.L, 0xAA, 0xAA)]
-        public void GetSetU8Register(RegisterType register, byte value, byte expected)
-        {
-            var cpu = new CPU();
-            cpu.SetU8Register(register, value);
-            Assert.Equal(expected, cpu.GetU8Register(register));
-        }
-
-        [Theory]
         [InlineData(RegisterType.AF, 0x0609, 0x0609)]
         [InlineData(RegisterType.BC, 0x9A00, 0x9A00)]
         [InlineData(RegisterType.DE, 0xF123, 0xF123)]
         [InlineData(RegisterType.HL, 0xFFFF, 0xFFFF)]
-        public void GetSetU16Register(RegisterType register, ushort value, ushort expected)
+        public void GetSetRegister(RegisterType register, ushort value, ushort expected)
         {
             var cpu = new CPU();
-            cpu.SetU16Register(register, value);
-            Assert.Equal(expected, cpu.GetU16Register(register));
+            cpu.SetRegister(register, value);
+            Assert.Equal(expected, cpu.GetRegister(register));
         }
 
         [Theory]

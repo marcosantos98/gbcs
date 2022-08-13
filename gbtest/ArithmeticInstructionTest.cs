@@ -14,11 +14,11 @@ namespace GBTest
         public void InstADD(byte aVal, RegisterType other, byte value, byte expected)
         {
             var cpu = new CPU();
-            cpu.SetU8Register(RegisterType.A, aVal);
-            cpu.SetU8Register(other, value);
+            cpu.SetRegister(RegisterType.A, aVal);
+            cpu.SetRegister(other, value);
             cpu.inst = Instructions.instructions[0x80];
             InstructionsHandlers.handlers[InstructionType.ADD].Invoke(cpu);
-            Assert.Equal(expected, cpu.GetU8Register(RegisterType.A));
+            Assert.Equal(expected, cpu.GetRegister(RegisterType.A));
         }
     }
 }

@@ -21,7 +21,7 @@ namespace GB
 
         public Instruction inst = Instructions.instructions[0x0];
 
-        public byte GetU8Register(RegisterType type)
+        public ushort GetRegister(RegisterType type)
         {
             return type switch
             {
@@ -33,56 +33,43 @@ namespace GB
                 RegisterType.F => registers[5],
                 RegisterType.H => registers[6],
                 RegisterType.L => registers[7],
-                _ => throw new ArgumentException("Given type isn't a valid 8bit register. Try GetU16Register instead.")
+                RegisterType.AF => (ushort)((GetRegister(RegisterType.A) << 8) | GetRegister(RegisterType.F)),
+                RegisterType.BC => (ushort)((GetRegister(RegisterType.B) << 8) | GetRegister(RegisterType.C)),
+                RegisterType.DE => (ushort)((GetRegister(RegisterType.D) << 8) | GetRegister(RegisterType.E)),
+                RegisterType.HL => (ushort)((GetRegister(RegisterType.H) << 8) | GetRegister(RegisterType.L)),
+                RegisterType.PC => pc,
+                RegisterType.SP => sp,
+                _ => throw new ArgumentException("Given type isn't a valid register.")
             };
         }
 
-        public ushort GetU16Register(RegisterType type)
-        {
-            return type switch
-            {
-                RegisterType.AF => (ushort)((GetU8Register(RegisterType.A) << 8) | GetU8Register(RegisterType.F)),
-                RegisterType.BC => (ushort)((GetU8Register(RegisterType.B) << 8) | GetU8Register(RegisterType.C)),
-                RegisterType.DE => (ushort)((GetU8Register(RegisterType.D) << 8) | GetU8Register(RegisterType.E)),
-                RegisterType.HL => (ushort)((GetU8Register(RegisterType.H) << 8) | GetU8Register(RegisterType.L)),
-                _ => throw new ArgumentException("Given type isn't a valid 16bit register. Try GetU8Register instead.")
-            };
-        }
-
-        public void SetU8Register(RegisterType type, byte value)
+        public void SetRegister(RegisterType type, ushort value)
         {
             switch (type)
             {
-                case RegisterType.A: registers[0] = value; break;
-                case RegisterType.B: registers[1] = value; break;
-                case RegisterType.C: registers[2] = value; break;
-                case RegisterType.D: registers[3] = value; break;
-                case RegisterType.E: registers[4] = value; break;
-                case RegisterType.F: registers[5] = value; break;
-                case RegisterType.H: registers[6] = value; break;
-                case RegisterType.L: registers[7] = value; break;
-            }
-        }
-
-        public void SetU16Register(RegisterType type, ushort value)
-        {
-            switch (type)
-            {
+                case RegisterType.A: registers[0] = (byte)(value & 0xFF); break;
+                case RegisterType.B: registers[1] = (byte)(value & 0xFF); break;
+                case RegisterType.C: registers[2] = (byte)(value & 0xFF); break;
+                case RegisterType.D: registers[3] = (byte)(value & 0xFF); break;
+                case RegisterType.E: registers[4] = (byte)(value & 0xFF); break;
+                case RegisterType.F: registers[5] = (byte)(value & 0xFF); break;
+                case RegisterType.H: registers[6] = (byte)(value & 0xFF); break;
+                case RegisterType.L: registers[7] = (byte)(value & 0xFF); break;
                 case RegisterType.AF:
-                    SetU8Register(RegisterType.A, (byte)((value & 0xFF00) >> 8));
-                    SetU8Register(RegisterType.F, (byte)(value & 0xFF));
+                    registers[0] = (byte)((value & 0xFF00) >> 8);
+                    registers[5] = (byte)(value & 0xFF);
                     break;
                 case RegisterType.BC:
-                    SetU8Register(RegisterType.B, (byte)((value & 0xFF00) >> 8));
-                    SetU8Register(RegisterType.C, (byte)(value & 0xFF));
+                    registers[1] = (byte)((value & 0xFF00) >> 8);
+                    registers[2] = (byte)(value & 0xFF);
                     break;
                 case RegisterType.DE:
-                    SetU8Register(RegisterType.D, (byte)((value & 0xFF00) >> 8));
-                    SetU8Register(RegisterType.E, (byte)(value & 0xFF));
+                    registers[3] = (byte)((value & 0xFF00) >> 8);
+                    registers[4] = (byte)(value & 0xFF);
                     break;
                 case RegisterType.HL:
-                    SetU8Register(RegisterType.H, (byte)((value & 0xFF00) >> 8));
-                    SetU8Register(RegisterType.L, (byte)(value & 0xFF));
+                    registers[6] = (byte)((value & 0xFF00) >> 8);
+                    registers[7] = (byte)(value & 0xFF);
                     break;
             }
         }
