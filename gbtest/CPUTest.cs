@@ -1,12 +1,10 @@
 using Xunit;
-using GB;
-using GB.Types;
+using GBCS.GB;
 
-namespace GBTest
+namespace GBCS.GBTest
 {
     public class CPUTest
     {
-        private CPU cpu = new CPU();
 
         [Theory]
         [InlineData(RegisterType.A, 0x6, 0x6)]
@@ -23,7 +21,7 @@ namespace GBTest
         [InlineData(RegisterType.HL, 0xFFFF, 0xFFFF)]
         public void GetSetRegister(RegisterType register, ushort value, ushort expected)
         {
-            var cpu = new CPU();
+            CPU cpu = new();
             cpu.SetRegister(register, value);
             Assert.Equal(expected, cpu.GetRegister(register));
         }
@@ -47,13 +45,13 @@ namespace GBTest
         [InlineData(0xF0, true, true, true, true)]        //ZNHC
         public void GetSetFlags(byte f, bool zero, bool sub, bool halfCarry, bool carry)
         {
-            var cpu = new CPU();
+            CPU cpu = new();
             cpu.SetFlags(f);
-            var flags = cpu.flags;
-            Assert.Equal(zero, flags.zero);
-            Assert.Equal(sub, flags.substract);
-            Assert.Equal(halfCarry, flags.halfCarry);
-            Assert.Equal(carry, flags.carry);
+            Flags flags = cpu.Flags;
+            Assert.Equal(zero, flags.Zero);
+            Assert.Equal(sub, flags.Substract);
+            Assert.Equal(halfCarry, flags.HalfCarry);
+            Assert.Equal(carry, flags.Carry);
         }
     }
 

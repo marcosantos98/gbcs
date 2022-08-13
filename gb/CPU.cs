@@ -1,44 +1,43 @@
-using GB.Types;
-
-namespace GB
+namespace GBCS.GB
 {
     public struct Flags
     {
-        public bool zero = false;
-        public bool substract = false;
-        public bool halfCarry = false;
-        public bool carry = false;
+        public bool Zero = false;
+        public bool Substract = false;
+        public bool HalfCarry = false;
+        public bool Carry = false;
 
         public Flags() { }
     }
 
     public class CPU
     {
-        public byte[] registers = new byte[8];
-        public ushort pc;
-        public ushort sp;
-        public Flags flags = new Flags();
+        public byte[] Registers = new byte[8];
+        public ushort Pc;
+        public ushort Sp;
+        public Flags Flags = new();
 
-        public Instruction inst = Instructions.instructions[0x0];
+        public Instruction Inst = Instructions.Get(0x0);
 
         public ushort GetRegister(RegisterType type)
         {
             return type switch
             {
-                RegisterType.A => registers[0],
-                RegisterType.B => registers[1],
-                RegisterType.C => registers[2],
-                RegisterType.D => registers[3],
-                RegisterType.E => registers[4],
-                RegisterType.F => registers[5],
-                RegisterType.H => registers[6],
-                RegisterType.L => registers[7],
+                RegisterType.A => Registers[0],
+                RegisterType.B => Registers[1],
+                RegisterType.C => Registers[2],
+                RegisterType.D => Registers[3],
+                RegisterType.E => Registers[4],
+                RegisterType.F => Registers[5],
+                RegisterType.H => Registers[6],
+                RegisterType.L => Registers[7],
                 RegisterType.AF => (ushort)((GetRegister(RegisterType.A) << 8) | GetRegister(RegisterType.F)),
                 RegisterType.BC => (ushort)((GetRegister(RegisterType.B) << 8) | GetRegister(RegisterType.C)),
                 RegisterType.DE => (ushort)((GetRegister(RegisterType.D) << 8) | GetRegister(RegisterType.E)),
                 RegisterType.HL => (ushort)((GetRegister(RegisterType.H) << 8) | GetRegister(RegisterType.L)),
-                RegisterType.PC => pc,
-                RegisterType.SP => sp,
+                RegisterType.PC => Pc,
+                RegisterType.SP => Sp,
+                RegisterType.NONE => throw new ArgumentException("Given type isn't a valid register."),
                 _ => throw new ArgumentException("Given type isn't a valid register.")
             };
         }
@@ -47,49 +46,55 @@ namespace GB
         {
             switch (type)
             {
-                case RegisterType.A: registers[0] = (byte)(value & 0xFF); break;
-                case RegisterType.B: registers[1] = (byte)(value & 0xFF); break;
-                case RegisterType.C: registers[2] = (byte)(value & 0xFF); break;
-                case RegisterType.D: registers[3] = (byte)(value & 0xFF); break;
-                case RegisterType.E: registers[4] = (byte)(value & 0xFF); break;
-                case RegisterType.F: registers[5] = (byte)(value & 0xFF); break;
-                case RegisterType.H: registers[6] = (byte)(value & 0xFF); break;
-                case RegisterType.L: registers[7] = (byte)(value & 0xFF); break;
+                case RegisterType.A: Registers[0] = (byte)(value & 0xFF); break;
+                case RegisterType.B: Registers[1] = (byte)(value & 0xFF); break;
+                case RegisterType.C: Registers[2] = (byte)(value & 0xFF); break;
+                case RegisterType.D: Registers[3] = (byte)(value & 0xFF); break;
+                case RegisterType.E: Registers[4] = (byte)(value & 0xFF); break;
+                case RegisterType.F: Registers[5] = (byte)(value & 0xFF); break;
+                case RegisterType.H: Registers[6] = (byte)(value & 0xFF); break;
+                case RegisterType.L: Registers[7] = (byte)(value & 0xFF); break;
                 case RegisterType.AF:
-                    registers[0] = (byte)((value & 0xFF00) >> 8);
-                    registers[5] = (byte)(value & 0xFF);
+                    Registers[0] = (byte)((value & 0xFF00) >> 8);
+                    Registers[5] = (byte)(value & 0xFF);
                     break;
                 case RegisterType.BC:
-                    registers[1] = (byte)((value & 0xFF00) >> 8);
-                    registers[2] = (byte)(value & 0xFF);
+                    Registers[1] = (byte)((value & 0xFF00) >> 8);
+                    Registers[2] = (byte)(value & 0xFF);
                     break;
                 case RegisterType.DE:
-                    registers[3] = (byte)((value & 0xFF00) >> 8);
-                    registers[4] = (byte)(value & 0xFF);
+                    Registers[3] = (byte)((value & 0xFF00) >> 8);
+                    Registers[4] = (byte)(value & 0xFF);
                     break;
                 case RegisterType.HL:
-                    registers[6] = (byte)((value & 0xFF00) >> 8);
-                    registers[7] = (byte)(value & 0xFF);
+                    Registers[6] = (byte)((value & 0xFF00) >> 8);
+                    Registers[7] = (byte)(value & 0xFF);
                     break;
+                case RegisterType.SP:
+                case RegisterType.PC:
+                case RegisterType.NONE:
+                    throw new ArgumentException("Given type isn't a valid register.");
+                default:
+                    throw new ArgumentException("Given type isn't a valid register.");
             }
         }
 
         public byte FromFlags()
         {
             return (byte)(
-                (flags.zero ? 1 : 0) << 7 |
-                (flags.substract ? 1 : 0) << 6 |
-                (flags.halfCarry ? 1 : 0) << 5 |
-                (flags.carry ? 1 : 0) << 4
+                ((Flags.Zero ? 1 : 0) << 7) |
+                ((Flags.Substract ? 1 : 0) << 6) |
+                ((Flags.HalfCarry ? 1 : 0) << 5) |
+                ((Flags.Carry ? 1 : 0) << 4)
                 );
         }
 
         public void SetFlags(byte value)
         {
-            flags.zero = ((value >> 7) & 0b1) != 0;
-            flags.substract = ((value >> 6) & 0b1) != 0;
-            flags.halfCarry = ((value >> 5) & 0b1) != 0;
-            flags.carry = ((value >> 4) & 0b1) != 0;
+            Flags.Zero = ((value >> 7) & 0b1) != 0;
+            Flags.Substract = ((value >> 6) & 0b1) != 0;
+            Flags.HalfCarry = ((value >> 5) & 0b1) != 0;
+            Flags.Carry = ((value >> 4) & 0b1) != 0;
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace GB.Types
+namespace GBCS.GB
 {
     public enum RegisterType
     {
