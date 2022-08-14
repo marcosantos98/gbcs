@@ -25,7 +25,6 @@ namespace GBCS.GB
             byte hi = cpu.Mem.Read((ushort)(cpu.Pc + 1));
             //fixme 22/08/14: Cycles
             cpu.AddressData = (ushort)(lo | (hi << 8));
-            Console.WriteLine("{0:X2} {1:X2}, {2:X4}", lo, hi, cpu.AddressData);
             cpu.Pc += 2;
         }
     }
