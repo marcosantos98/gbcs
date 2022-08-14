@@ -19,6 +19,7 @@ namespace GBCS.GB
         public Flags Flags = new();
 
         public bool WasHalted;
+        public bool IMEEnabled;
 
         public Instruction Inst = Instructions.Get(0x0);
         public MemoryManager Mem = new();

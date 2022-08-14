@@ -26,6 +26,9 @@ namespace GBCS.GB
             //fixme 22/08/14: Check flags and if is a PC Register.
             //fixme 22/08/14: Cycles
             Handlers.Add(InstructionType.JP, cpu => cpu.Pc = cpu.AddressData);
+            //fixme 22/08/14: RETI
+            Handlers.Add(InstructionType.EI, cpu => cpu.IMEEnabled = true);
+            Handlers.Add(InstructionType.DI, cpu => cpu.IMEEnabled = false);
         }
 
         private static (byte, bool) OverflowAdd(byte a, byte b)
