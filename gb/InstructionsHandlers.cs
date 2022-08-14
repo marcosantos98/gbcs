@@ -7,6 +7,7 @@ namespace GBCS.GB
 
         static InstructionsHandlers()
         {
+            Handlers.Add(InstructionType.NOP, (cpu) => { });
             Handlers.Add(InstructionType.ADD, (cpu) =>
             {
                 if (IsU16Register(cpu.Inst.RegTwo))
@@ -22,6 +23,9 @@ namespace GBCS.GB
                 cpu.Flags.HalfCarry = (a & 0xF) + (b & 0xF) > 0xF;
                 cpu.SetRegister(RegisterType.A, result.Item1);
             });
+            //fixme 22/08/14: Check flags and if is a PC Register.
+            //fixme 22/08/14: Cycles
+            Handlers.Add(InstructionType.JP, cpu => cpu.Pc = cpu.AddressData);
         }
 
         private static (byte, bool) OverflowAdd(byte a, byte b)

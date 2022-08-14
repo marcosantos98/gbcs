@@ -15,9 +15,29 @@ namespace GBCS.GB
         public byte[] Registers = new byte[8];
         public ushort Pc;
         public ushort Sp;
+        public ushort AddressData;
         public Flags Flags = new();
 
+        public bool WasHalted;
+
         public Instruction Inst = Instructions.Get(0x0);
+        public MemoryManager Mem = new();
+
+        public CPU()
+        {
+            Pc = 0x100; //https://gbdev.io/pandocs/The_Cartridge_Header.html#0100-0103---entry-point
+        }
+
+        public void Step()
+        {
+            if (!WasHalted)
+            {
+                byte opcode = Mem.Read(Pc++);
+                Inst = Instructions.Get(opcode);
+                AddressDataHandlers.Get(Inst.Addr).Invoke(this);
+                InstructionsHandlers.Get(Inst.Type).Invoke(this);
+            }
+        }
 
         public ushort GetRegister(RegisterType type)
         {
