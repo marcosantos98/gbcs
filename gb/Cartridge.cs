@@ -32,8 +32,8 @@ namespace GBCS.GB
             Info.SgbFlag = ROM[0x146];
             Info.OldLicense = ROM[0x14B];
             Info.NewLicense = (ushort)((ROM[0x144] & (0xFF << 8)) | (ROM[0x145] & 0xFF));
-            Info.CartidgeType = ROM[0x147];
-            Info.ROMSize = ROM[0x148];
+            Info.CartidgeType = 32;
+            Info.ROMSize = (byte)(32 * (1 << ROM[0x148]));
             Info.RAMSize = ROM[0x149];
             Info.Version = ROM[0x14C];
             Info.Checksum = ROM[0x14D];
