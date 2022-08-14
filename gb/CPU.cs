@@ -92,7 +92,11 @@ namespace GBCS.GB
                     Registers[7] = (byte)(value & 0xFF);
                     break;
                 case RegisterType.SP:
+                    Sp = value;
+                    break;
                 case RegisterType.PC:
+                    Pc = value;
+                    break;
                 case RegisterType.NONE:
                     throw new ArgumentException("Given type isn't a valid register.");
                 default:
