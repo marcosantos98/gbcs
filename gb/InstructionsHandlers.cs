@@ -64,6 +64,25 @@ namespace GBCS.GB
                 //fixme 22/08/14: Cycles
             });
             Handlers.Add(InstructionType.JR, cpu => JumpTo(cpu, (ushort)(cpu.Pc + (cpu.AddressData & 0xFF)), false));
+            Handlers.Add(InstructionType.RET, cpu =>
+            {
+                if (cpu.Inst.Cond != ConditionType.NONE)
+                {
+                    //fixme 22/08/15: Cycles
+                }
+
+                if (cpu.ValidateInstCondition())
+                {
+                    byte lo = cpu.Pop();
+                    //fixme 22/08/15: Cycles
+                    byte hi = cpu.Pop();
+                    //fixme 22/08/15: Cycles
+
+                    ushort n = (ushort)((hi << 8) | lo);
+                    cpu.Pc = n;
+                    //fixme 22/08/15: Cycles
+                }
+            });
         }
 
         private static void JumpTo(CPU cpu, ushort address, bool setPC)
