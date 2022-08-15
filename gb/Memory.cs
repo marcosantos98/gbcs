@@ -9,7 +9,7 @@ namespace GBCS.GB
         {
             if (address < 0x8000)
             {
-                Console.WriteLine("Reading 0x{0:X4} from ROM.", address);
+                //Console.WriteLine("Reading 0x{0:X4} from ROM.", address);
                 return Memory[address];
             }
             else if (address < 0xA000)

@@ -25,10 +25,60 @@ namespace GBCS.GB
             });
             //fixme 22/08/14: Check flags and if is a PC Register.
             //fixme 22/08/14: Cycles
-            Handlers.Add(InstructionType.JP, cpu => cpu.Pc = cpu.AddressData);
+            Handlers.Add(InstructionType.JP, cpu => JumpTo(cpu, cpu.AddressData, false));
+            Handlers.Add(InstructionType.CALL, cpu => JumpTo(cpu, cpu.AddressData, false));
             //fixme 22/08/14: RETI
             Handlers.Add(InstructionType.EI, cpu => cpu.IMEEnabled = true);
             Handlers.Add(InstructionType.DI, cpu => cpu.IMEEnabled = false);
+            Handlers.Add(InstructionType.LD, cpu =>
+            {
+                if (cpu.PcIsMemDest)
+                {
+                    if (IsU16Register(cpu.Inst.RegTwo))
+                    {
+                        cpu.Mem.Write((ushort)(cpu.MemDest + 1), (byte)(cpu.AddressData & 0xFF));
+                        cpu.Mem.Write(cpu.MemDest, (byte)((cpu.AddressData & 0xFF00) >> 8));
+                    }
+                    else
+                    {
+                        cpu.Mem.Write(cpu.MemDest, (byte)cpu.AddressData);
+                    }
+                }
+                else
+                {
+                    cpu.SetRegister(cpu.Inst.RegOne, cpu.AddressData);
+                }
+            });
+            Handlers.Add(InstructionType.LDH, cpu =>
+            {
+                if (cpu.Inst.RegOne == RegisterType.A)
+                {
+                    // Read IO Register to A
+                    cpu.SetRegister(RegisterType.A, cpu.Mem.Read((ushort)(0xFF00 | cpu.AddressData)));
+                }
+                else
+                {
+                    // Write to IO Register from A
+                    cpu.Mem.Write((ushort)(0xFF00 | cpu.AddressData), (byte)cpu.GetRegister(RegisterType.A));
+                }
+                //fixme 22/08/14: Cycles
+            });
+        }
+
+        private static void JumpTo(CPU cpu, ushort address, bool setPC)
+        {
+            if (cpu.ValidateInstCondition())
+            {
+                if (setPC)
+                {
+                    //fixme 22/08/14: Cycles
+                    //fixme 22/08/14: PUSH
+                    throw new NotImplementedException();
+                }
+
+                cpu.Pc = address;
+                //fixme 22/08/14: cycles
+            }
         }
 
         private static (byte, bool) OverflowAdd(byte a, byte b)
@@ -48,9 +98,9 @@ namespace GBCS.GB
             RegisterType.PC or RegisterType.SP;
         }
 
-        public static Action<CPU> Get(InstructionType type)
+        public static Action<CPU>? Get(InstructionType type)
         {
-            return Handlers[type];
+            return Handlers.ContainsKey(type) ? Handlers[type] : null;
         }
     }
 }

@@ -21,23 +21,80 @@ namespace GBCS.GB
         public bool WasHalted;
         public bool IMEEnabled;
 
+        public ushort MemDest;
+        public bool PcIsMemDest;
+
         public Instruction Inst = Instructions.Get(0x0);
         public MemoryManager Mem = new();
+
+        private readonly StringWriter _writer = new();
 
         public CPU()
         {
             Pc = 0x100; //https://gbdev.io/pandocs/The_Cartridge_Header.html#0100-0103---entry-point
         }
 
-        public void Step()
+        public bool Step()
         {
             if (!WasHalted)
             {
+                MemDest = 0;
+                PcIsMemDest = false;
+
+                _writer.WriteLine("> PC: {0:X4}", Pc);
+
                 byte opcode = Mem.Read(Pc++);
+
                 Inst = Instructions.Get(opcode);
-                AddressDataHandlers.Get(Inst.Addr).Invoke(this);
-                InstructionsHandlers.Get(Inst.Type).Invoke(this);
+
+                _writer.WriteLine("    Opcode: {0:X2} NextTwo: {1:X2} {2:X2} AddressData: {3:X4}", opcode, Mem.Read(Pc), Mem.Read((ushort)(Pc + 1)), AddressData);
+                _writer.WriteLine("    Inst:{0}, {1}, {2}, {3}, {4}", Inst.Type, Inst.Addr, Inst.RegOne, Inst.RegTwo, Inst.Cond);
+                _writer.WriteLine("    REG: AF:{0:X2}{1:X2},BC:{2:X2}{3:X2},DE:{4:X2}{5:X2},HL:{6:X2}{7:X2}",
+                 GetRegister(RegisterType.A), GetRegister(RegisterType.F), GetRegister(RegisterType.B), GetRegister(RegisterType.B), GetRegister(RegisterType.D), GetRegister(RegisterType.E), GetRegister(RegisterType.H), GetRegister(RegisterType.H)
+                );
+
+                Action<CPU>? addressHandler = AddressDataHandlers.Get(Inst.Addr);
+
+                if (addressHandler == null)
+                {
+                    Console.Write(_writer.ToString());
+                    return false;
+                }
+                else
+                {
+                    addressHandler.Invoke(this);
+                }
+
+                Action<CPU>? instHandler = InstructionsHandlers.Get(Inst.Type);
+
+                if (instHandler == null)
+                {
+                    Console.Write(_writer.ToString());
+                    return false;
+                }
+                else
+                {
+                    instHandler.Invoke(this);
+                }
+
+                _ = _writer.GetStringBuilder().Remove(0, _writer.GetStringBuilder().Length);
+
+                return true;
             }
+            return true;
+        }
+
+        public bool ValidateInstCondition()
+        {
+            return Inst.Cond switch
+            {
+                ConditionType.NONE => true,
+                ConditionType.NZ => !Flags.Zero,
+                ConditionType.Z => Flags.Zero,
+                ConditionType.NC => !Flags.Carry,
+                ConditionType.C => Flags.Carry,
+                _ => throw new NotImplementedException()
+            };
         }
 
         public ushort GetRegister(RegisterType type)
@@ -58,8 +115,8 @@ namespace GBCS.GB
                 RegisterType.HL => (ushort)((GetRegister(RegisterType.H) << 8) | GetRegister(RegisterType.L)),
                 RegisterType.PC => Pc,
                 RegisterType.SP => Sp,
-                RegisterType.NONE => throw new ArgumentException("Given type isn't a valid register."),
-                _ => throw new ArgumentException("Given type isn't a valid register.")
+                RegisterType.NONE => throw new ArgumentException("Read: Given type isn't a valid register. " + type),
+                _ => throw new ArgumentException("Read: Given type isn't a valid register. " + type)
             };
         }
 
@@ -98,9 +155,9 @@ namespace GBCS.GB
                     Pc = value;
                     break;
                 case RegisterType.NONE:
-                    throw new ArgumentException("Given type isn't a valid register.");
+                    throw new ArgumentException("Write: Given type isn't a valid register. " + type);
                 default:
-                    throw new ArgumentException("Given type isn't a valid register.");
+                    throw new ArgumentException("Write: Given type isn't a valid register. " + type);
             }
         }
 

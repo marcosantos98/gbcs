@@ -12,7 +12,7 @@ namespace GBCS
             Console.WriteLine("Cartridge Info:");
             Console.WriteLine("\tTitle: {0}", cartidge.Info.Title);
             Console.WriteLine("\tVersion: {0}", cartidge.Info.Version);
-            Console.WriteLine("\tROM Size: {0}", cartidge.Info.ROMSize);
+            Console.WriteLine("\tROM Size: {0} Kb", cartidge.Info.ROMSize);
             Console.WriteLine("\tRAM Size: {0}", cartidge.Info.RAMSize);
             Console.WriteLine("\tCartridge Type: {0}", cartidge.Info.CartidgeType);
             Console.WriteLine("\tChecksum: {0}", cartidge.Info.Checksum);
@@ -24,7 +24,10 @@ namespace GBCS
 
             while (!cpu.WasHalted)
             {
-                cpu.Step();
+                if (!cpu.Step())
+                {
+                    break;
+                }
             }
         }
     }
