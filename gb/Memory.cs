@@ -3,7 +3,7 @@ namespace GBCS.GB
     public class MemoryManager
     {
 
-        public byte[] Memory = new byte[0xFFFF];
+        public byte[] Memory = new byte[0xFFFF + 0x0001];
 
         public byte Read(ushort address)
         {
