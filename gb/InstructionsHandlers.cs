@@ -139,6 +139,15 @@ namespace GBCS.GB
                 cpu.Flags.Carry = (val & 0x0F) == 0;
                 cpu.Flags.HalfCarry = false;
             });
+            Handlers.Add(InstructionType.CPL, cpu =>
+            {
+                cpu.SetRegister(RegisterType.A, (byte)~cpu.GetRegister(RegisterType.A));
+
+                cpu.Flags.Zero = false;
+                cpu.Flags.Substract = true;
+                cpu.Flags.Carry = true;
+                cpu.Flags.HalfCarry = false;
+            });
         }
 
         private static void JumpTo(CPU cpu, ushort address, bool setPC)
