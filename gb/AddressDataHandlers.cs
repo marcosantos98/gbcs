@@ -15,6 +15,12 @@ namespace GBCS.GB
                 cpu.PcIsMemDest = true;
                 //fixme 22/08/14: Cycles
             });
+            Handlers.Add(AddressMode.R_HLI, cpu =>
+            {
+                cpu.AddressData = cpu.Mem.Read(cpu.GetRegister(cpu.Inst.RegTwo));
+                //fixme 22/08/15: cycles
+                cpu.SetRegister(RegisterType.HL, (byte)(cpu.GetRegister(RegisterType.HL) + 1));
+            });
             Handlers.Add(AddressMode.D16, RD16_D16);
             Handlers.Add(AddressMode.R_D16, RD16_D16);
             Handlers.Add(AddressMode.A16_R, A16R_D16R);
