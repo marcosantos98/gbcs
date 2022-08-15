@@ -177,6 +177,43 @@ namespace GBCS.GB
                 cpu.Flags.Carry = true;
                 cpu.Flags.HalfCarry = false;
             });
+            Handlers.Add(InstructionType.XOR, cpu =>
+            {
+                cpu.SetRegister(RegisterType.A, (byte)(cpu.GetRegister(RegisterType.A) ^ (cpu.AddressData & 0xFF)));
+
+                cpu.Flags.Zero = cpu.GetRegister(RegisterType.A) == 0;
+                cpu.Flags.Substract = false;
+                cpu.Flags.Carry = false;
+                cpu.Flags.HalfCarry = false;
+            });
+            Handlers.Add(InstructionType.AND, cpu =>
+            {
+                cpu.SetRegister(RegisterType.A, (byte)(cpu.GetRegister(RegisterType.A) & cpu.AddressData));
+
+                cpu.Flags.Zero = cpu.GetRegister(RegisterType.A) == 0;
+                cpu.Flags.Substract = false;
+                cpu.Flags.Carry = true;
+                cpu.Flags.HalfCarry = false;
+            });
+            Handlers.Add(InstructionType.OR, cpu =>
+            {
+                ushort a = (ushort)((cpu.GetRegister(RegisterType.A) | cpu.AddressData) & 0xFF);
+                cpu.SetRegister(RegisterType.A, a);
+
+                cpu.Flags.Zero = cpu.GetRegister(RegisterType.A) == 0;
+                cpu.Flags.Substract = false;
+                cpu.Flags.Carry = true;
+                cpu.Flags.HalfCarry = false;
+            });
+            Handlers.Add(InstructionType.CP, cpu =>
+            {
+                ushort n = (ushort)(cpu.GetRegister(RegisterType.A) - cpu.AddressData);
+
+                cpu.Flags.Zero = n == 0;
+                cpu.Flags.Substract = true;
+                cpu.Flags.Carry = (cpu.GetRegister(RegisterType.A) & 0x0F) < 0;
+                cpu.Flags.HalfCarry = n < 0;
+            });
         }
 
         private static void JumpTo(CPU cpu, ushort address, bool setPC)
