@@ -25,9 +25,9 @@ namespace GBCS.GB
             Handlers.Add(AddressMode.HL_SPR, RD8_D8_RA8_HLSPR);
         }
 
-        public static Action<CPU> Get(AddressMode mode)
+        public static Action<CPU>? Get(AddressMode mode)
         {
-            return Handlers[mode];
+            return Handlers.ContainsKey(mode) ? Handlers[mode] : null;
         }
 
         private static void RD16_D16(CPU cpu)
@@ -47,7 +47,6 @@ namespace GBCS.GB
             byte hi = cpu.Mem.Read((ushort)(cpu.Pc + 1));
             //fixme 22/08/14: Cycles
             cpu.MemDest = (ushort)(lo | (hi << 8));
-            Logger.LogLn("\tLow 0x{0:X2}, Hi 0x{1:X2}, Val: 0x{2:X4}", lo, hi, cpu.MemDest);
             cpu.PcIsMemDest = true;
             cpu.Pc += 2;
             cpu.AddressData = cpu.GetRegister(cpu.Inst.RegTwo);
