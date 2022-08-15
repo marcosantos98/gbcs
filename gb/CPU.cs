@@ -15,6 +15,7 @@ namespace GBCS.GB
         public byte[] Registers = new byte[8];
         public ushort Pc;
         public ushort Sp;
+        public byte Opcode;
         public ushort AddressData;
         public Flags Flags = new();
 
@@ -43,11 +44,11 @@ namespace GBCS.GB
 
                 _writer.WriteLine("> PC: {0:X4}", Pc);
 
-                byte opcode = Mem.Read(Pc++);
+                Opcode = Mem.Read(Pc++);
 
-                Inst = Instructions.Get(opcode);
+                Inst = Instructions.Get(Opcode);
 
-                _writer.WriteLine("    Opcode: {0:X2} NextTwo: {1:X2} {2:X2} AddressData: {3:X4}", opcode, Mem.Read(Pc), Mem.Read((ushort)(Pc + 1)), AddressData);
+                _writer.WriteLine("    Opcode: {0:X2} NextTwo: {1:X2} {2:X2} AddressData: {3:X4}", Opcode, Mem.Read(Pc), Mem.Read((ushort)(Pc + 1)), AddressData);
                 _writer.WriteLine("    Inst:{0}, {1}, {2}, {3}, {4}", Inst.Type, Inst.Addr, Inst.RegOne, Inst.RegTwo, Inst.Cond);
                 _writer.WriteLine("    REG: AF:{0:X2}{1:X2},BC:{2:X2}{3:X2},DE:{4:X2}{5:X2},HL:{6:X2}{7:X2}",
                  GetRegister(RegisterType.A), GetRegister(RegisterType.F), GetRegister(RegisterType.B), GetRegister(RegisterType.B), GetRegister(RegisterType.D), GetRegister(RegisterType.E), GetRegister(RegisterType.H), GetRegister(RegisterType.H)
@@ -57,6 +58,7 @@ namespace GBCS.GB
 
                 if (addressHandler == null)
                 {
+                    Console.WriteLine("Address not implemented!");
                     Console.Write(_writer.ToString());
                     return false;
                 }
@@ -69,6 +71,7 @@ namespace GBCS.GB
 
                 if (instHandler == null)
                 {
+                    Console.WriteLine("Instruction not implemented!");
                     Console.Write(_writer.ToString());
                     return false;
                 }

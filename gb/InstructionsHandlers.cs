@@ -110,6 +110,35 @@ namespace GBCS.GB
                     cpu.SetRegister(RegisterType.AF, (ushort)(n & 0xFFF0));
                 }
             });
+            Handlers.Add(InstructionType.INC, cpu =>
+            {
+                ushort val = (ushort)(cpu.GetRegister(cpu.Inst.RegOne) + 1);
+                if (IsU16Register(cpu.Inst.RegOne))
+                {
+                    //fixme 22/08/15: cycles
+                }
+
+                if (cpu.Inst.RegOne == RegisterType.HL && cpu.Inst.Addr == AddressMode.MR)
+                {
+                    val = cpu.Mem.Read((byte)(cpu.GetRegister(RegisterType.HL) + 1));
+                    val &= 0xFF;
+                    cpu.Mem.Write(cpu.GetRegister(RegisterType.HL), (byte)val);
+                }
+                else
+                {
+                    cpu.SetRegister(cpu.Inst.RegOne, val);
+                    val = cpu.GetRegister(cpu.Inst.RegOne);
+                }
+                if ((cpu.Opcode & 0x03) == 0x03)
+                {
+                    return;
+                }
+
+                cpu.Flags.Zero = val == 0;
+                cpu.Flags.Substract = false;
+                cpu.Flags.Carry = (val & 0x0F) == 0;
+                cpu.Flags.HalfCarry = false;
+            });
         }
 
         private static void JumpTo(CPU cpu, ushort address, bool setPC)
