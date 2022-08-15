@@ -63,6 +63,7 @@ namespace GBCS.GB
                 }
                 //fixme 22/08/14: Cycles
             });
+            Handlers.Add(InstructionType.JR, cpu => JumpTo(cpu, (ushort)(cpu.Pc + (cpu.AddressData & 0xFF)), false));
         }
 
         private static void JumpTo(CPU cpu, ushort address, bool setPC)
