@@ -84,6 +84,18 @@ namespace GBCS.GB
             return true;
         }
 
+        public void Push(byte val)
+        {
+            Sp--;
+            Mem.Write(Sp, val);
+        }
+
+        public byte Pop()
+        {
+            return Mem.Read(Sp++);
+        }
+
+
         public bool ValidateInstCondition()
         {
             return Inst.Cond switch

@@ -26,7 +26,7 @@ namespace GBCS.GB
             //fixme 22/08/14: Check flags and if is a PC Register.
             //fixme 22/08/14: Cycles
             Handlers.Add(InstructionType.JP, cpu => JumpTo(cpu, cpu.AddressData, false));
-            Handlers.Add(InstructionType.CALL, cpu => JumpTo(cpu, cpu.AddressData, false));
+            Handlers.Add(InstructionType.CALL, cpu => JumpTo(cpu, cpu.AddressData, true));
             //fixme 22/08/14: RETI
             Handlers.Add(InstructionType.EI, cpu => cpu.IMEEnabled = true);
             Handlers.Add(InstructionType.DI, cpu => cpu.IMEEnabled = false);
@@ -73,8 +73,8 @@ namespace GBCS.GB
                 if (setPC)
                 {
                     //fixme 22/08/14: Cycles
-                    //fixme 22/08/14: PUSH
-                    throw new NotImplementedException();
+                    cpu.Push((byte)((cpu.Pc >> 8) & 0xFF));
+                    cpu.Push((byte)(cpu.Pc & 0xFF));
                 }
 
                 cpu.Pc = address;
