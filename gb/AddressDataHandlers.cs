@@ -21,6 +21,17 @@ namespace GBCS.GB
                 //fixme 22/08/15: cycles
                 cpu.SetRegister(RegisterType.HL, (byte)(cpu.GetRegister(RegisterType.HL) + 1));
             });
+            Handlers.Add(AddressMode.R_MR, cpu =>
+            {
+                ushort address = cpu.GetRegister(cpu.Inst.RegTwo);
+                if (cpu.Inst.RegOne == RegisterType.C)
+                {
+                    address |= 0xFF00;
+                }
+
+                cpu.AddressData = cpu.Mem.Read(address);
+                //fixme 22/08/15: cycles
+            });
             Handlers.Add(AddressMode.D16, RD16_D16);
             Handlers.Add(AddressMode.R_D16, RD16_D16);
             Handlers.Add(AddressMode.A16_R, A16R_D16R);
