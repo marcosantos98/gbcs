@@ -83,6 +83,33 @@ namespace GBCS.GB
                     //fixme 22/08/15: Cycles
                 }
             });
+            Handlers.Add(InstructionType.PUSH, cpu =>
+            {
+                byte hi = (byte)((cpu.GetRegister(cpu.Inst.RegOne) >> 8) & 0xFF);
+                //fixme 22/08/15: Cycles
+                cpu.Push(hi);
+
+                byte lo = (byte)((cpu.GetRegister(cpu.Inst.RegOne) >> 8) & 0xFF);
+                //fixme 22/08/15: Cycles
+                cpu.Push(lo);
+
+                //fixme 22/08/15: Cycles
+            });
+            Handlers.Add(InstructionType.POP, cpu =>
+            {
+                byte lo = cpu.Pop();
+                //fixme 22/08/15: Cycles
+                byte hi = cpu.Pop();
+                //fixme 22/08/15: Cycles
+
+                ushort n = (ushort)((hi << 8) | lo);
+                cpu.SetRegister(cpu.Inst.RegOne, n);
+
+                if (cpu.Inst.RegOne == RegisterType.AF)
+                {
+                    cpu.SetRegister(RegisterType.AF, (ushort)(n & 0xFFF0));
+                }
+            });
         }
 
         private static void JumpTo(CPU cpu, ushort address, bool setPC)
