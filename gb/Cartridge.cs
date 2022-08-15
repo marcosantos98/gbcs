@@ -5,7 +5,7 @@ namespace GBCS.GB
 
         public struct CartridgeInfo
         {
-            public byte[] Title;
+            public string Title;
             public byte SgbFlag;
             public byte OldLicense;
             public ushort NewLicense;
@@ -27,8 +27,9 @@ namespace GBCS.GB
             //fixme 22/08/13: Check for errors;
 
             //Fill info
-            Info.Title = new byte[0x143 - 0x134];
-            Buffer.BlockCopy(ROM, 0x134, Info.Title, 0, 0x143 - 0x134);
+            byte[] title = new byte[0x143 - 0x134];
+            Buffer.BlockCopy(ROM, 0x134, title, 0, 0x143 - 0x134);
+            Info.Title = System.Text.Encoding.UTF8.GetString(title, 0, title.Length);
             Info.SgbFlag = ROM[0x146];
             Info.OldLicense = ROM[0x14B];
             Info.NewLicense = (ushort)((ROM[0x144] & (0xFF << 8)) | (ROM[0x145] & 0xFF));
