@@ -13,40 +13,61 @@ namespace GBCS.GB
     public class CPU
     {
         public byte[] Registers = new byte[8];
+        public ushort OldPc;
         public ushort Pc;
         public ushort Sp;
         public byte Opcode;
         public ushort AddressData;
         public Flags Flags = new();
+        public byte InterruptsFlag;
 
         public bool WasHalted;
+
+        public byte IERegister;
         public bool IMEEnabled;
+        public bool EnableIME;
 
         public ushort MemDest;
         public bool PcIsMemDest;
 
         public Instruction Inst = Instructions.Get(0x0);
-        public MemoryManager Mem = new();
+        public MemoryManager Mem;
 
         private readonly StringWriter _writer = new();
 
+        public Log Stack = new("stack");
+
         public CPU()
         {
+            Mem = new(this);
             Pc = 0x100; //https://gbdev.io/pandocs/The_Cartridge_Header.html#0100-0103---entry-point
+            Sp = 0xFFFE;
+
+            Stack.LogLn("Stack Init: {0:X4}:{1:X2}", 0xFFFE, Mem.Read(0xFFEE));
+
+            SetRegister(RegisterType.A, 0x1);
         }
 
         public bool Step()
         {
             if (!WasHalted)
             {
+
+
                 MemDest = 0;
                 PcIsMemDest = false;
 
                 _writer.WriteLine("> PC: {0:X4}", Pc);
 
+                OldPc = Pc;
+
+
+
                 Opcode = Mem.Read(Pc++);
 
                 Inst = Instructions.Get(Opcode);
+
+                DumpState();
 
                 _writer.WriteLine("    Opcode: {0:X2} NextTwo: {1:X2} {2:X2} AddressData: {3:X4}", Opcode, Mem.Read(Pc), Mem.Read((ushort)(Pc + 1)), AddressData);
                 _writer.WriteLine("    Inst:{0}, {1}, {2}, {3}, {4}", Inst.Type, Inst.Addr, Inst.RegOne, Inst.RegTwo, Inst.Cond);
@@ -60,6 +81,7 @@ namespace GBCS.GB
                 {
                     Console.WriteLine("Address not implemented!");
                     Console.Write(_writer.ToString());
+                    Stack.ToFile();
                     return false;
                 }
                 else
@@ -73,6 +95,7 @@ namespace GBCS.GB
                 {
                     Console.WriteLine("Instruction not implemented!");
                     Console.Write(_writer.ToString());
+                    Stack.ToFile();
                     return false;
                 }
                 else
@@ -80,31 +103,73 @@ namespace GBCS.GB
                     instHandler.Invoke(this);
                 }
 
+
                 _ = _writer.GetStringBuilder().Remove(0, _writer.GetStringBuilder().Length);
 
                 return true;
             }
+            else
+            {
+                //fixme 22/08/17: cycles
+                if (Convert.ToBoolean(InterruptsFlag))
+                {
+                    WasHalted = false;
+                }
+            }
+
+            if (IMEEnabled)
+            {
+                //fixme 22/08/17: Implement cpu interrupts;
+                EnableIME = false;
+            }
+
+            if (EnableIME)
+            {
+                IMEEnabled = true;
+            }
+
             return true;
+        }
+
+        public void DumpState()
+        {
+            Console.WriteLine(
+                "{0:X4}: {1,-7} ({2:X2} {3:X2} {4:X2}) A: {5:X2} F: {6}{7}{8}{9} BC: {10:X2}{11:X2} DE: {12:X2}{13:X2} HL: {14:X2}{15:X2}",
+                OldPc, Inst.Type, Opcode, Mem.Read(Pc), Mem.Read((ushort)(Pc + 1)),
+                GetRegister(RegisterType.A),
+                Flags.Zero ? "Z" : "-", Flags.Substract ? "N" : "-", Flags.HalfCarry ? "H" : "-", Flags.Carry ? "C" : "-",
+                GetRegister(RegisterType.B), GetRegister(RegisterType.C),
+                GetRegister(RegisterType.D), GetRegister(RegisterType.E),
+                GetRegister(RegisterType.H), GetRegister(RegisterType.L)
+            );
         }
 
         public void Push(byte val)
         {
             Sp--;
             Mem.Write(Sp, val);
+            Stack.LogLn("PC: {0:X4} push: {1:X2} to {0:X4}", OldPc, val, Sp);
+        }
+
+        public void PushU16(ushort val)
+        {
+            Push((byte)((val >> 8) & 0xFF));
+            Push((byte)(val & 0xFF));
+            Stack.LogLn("PC: {0:X4} push: {1:X4} to {0:X4}", OldPc, val, Sp);
         }
 
         public byte Pop()
         {
+            Stack.LogLn("PC: {0:X4} pop: {1:X2} from {0:X4}", OldPc, Mem.Read(Sp), Sp);
             return Mem.Read(Sp++);
         }
-
 
         public bool ValidateInstCondition()
         {
             return Inst.Cond switch
             {
                 ConditionType.NONE => true,
-                ConditionType.NZ => !Flags.Zero,
+                ConditionType.NZ => Flags.Zero == false,
                 ConditionType.Z => Flags.Zero,
                 ConditionType.NC => !Flags.Carry,
                 ConditionType.C => Flags.Carry,
@@ -130,7 +195,7 @@ namespace GBCS.GB
                 RegisterType.HL => (ushort)((GetRegister(RegisterType.H) << 8) | GetRegister(RegisterType.L)),
                 RegisterType.PC => Pc,
                 RegisterType.SP => Sp,
-                RegisterType.NONE => throw new ArgumentException("Read: Given type isn't a valid register. " + type),
+                RegisterType.NONE => 0,
                 _ => throw new ArgumentException("Read: Given type isn't a valid register. " + type)
             };
         }
@@ -170,7 +235,7 @@ namespace GBCS.GB
                     Pc = value;
                     break;
                 case RegisterType.NONE:
-                    throw new ArgumentException("Write: Given type isn't a valid register. " + type);
+                    break;
                 default:
                     throw new ArgumentException("Write: Given type isn't a valid register. " + type);
             }

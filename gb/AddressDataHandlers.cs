@@ -19,7 +19,7 @@ namespace GBCS.GB
             {
                 cpu.AddressData = cpu.Mem.Read(cpu.GetRegister(cpu.Inst.RegTwo));
                 //fixme 22/08/15: cycles
-                cpu.SetRegister(RegisterType.HL, (byte)(cpu.GetRegister(RegisterType.HL) + 1));
+                cpu.SetRegister(RegisterType.HL, (ushort)(cpu.GetRegister(RegisterType.HL) + 1));
             });
             Handlers.Add(AddressMode.R_MR, cpu =>
             {
@@ -31,6 +31,50 @@ namespace GBCS.GB
 
                 cpu.AddressData = cpu.Mem.Read(address);
                 //fixme 22/08/15: cycles
+            });
+            Handlers.Add(AddressMode.R_A16, cpu =>
+            {
+                byte lo = cpu.Mem.Read(cpu.Pc);
+                //fixme 22/08/17: cycles
+                byte hi = cpu.Mem.Read((ushort)(cpu.Pc + 1));
+                //fixme 22/08/17: cycles
+                ushort address = (ushort)(lo | (hi << 8));
+                cpu.Pc += 2;
+                cpu.AddressData = cpu.Mem.Read(address);
+                //fixme 22/08/15: cycles
+            });
+            Handlers.Add(AddressMode.MR_R, cpu =>
+            {
+                cpu.AddressData = cpu.GetRegister(cpu.Inst.RegTwo);
+                cpu.MemDest = cpu.GetRegister(cpu.Inst.RegOne);
+                cpu.PcIsMemDest = true;
+
+                if (cpu.Inst.RegOne == RegisterType.C)
+                {
+                    cpu.MemDest |= 0xFF00;
+                }
+
+            });
+            Handlers.Add(AddressMode.HLI_R, cpu =>
+            {
+                cpu.AddressData = cpu.GetRegister(cpu.Inst.RegTwo);
+                cpu.MemDest = cpu.GetRegister(cpu.Inst.RegOne);
+                cpu.PcIsMemDest = true;
+                cpu.SetRegister(RegisterType.HL, (ushort)(cpu.GetRegister(RegisterType.HL) + 1));
+            });
+            Handlers.Add(AddressMode.HLD_R, cpu =>
+            {
+                cpu.AddressData = cpu.GetRegister(cpu.Inst.RegTwo);
+                cpu.MemDest = cpu.GetRegister(cpu.Inst.RegOne);
+                cpu.PcIsMemDest = true;
+                cpu.SetRegister(RegisterType.HL, (ushort)(cpu.GetRegister(RegisterType.HL) - 1));
+            });
+            Handlers.Add(AddressMode.MR, cpu =>
+            {
+                cpu.MemDest = cpu.GetRegister(cpu.Inst.RegOne);
+                cpu.PcIsMemDest = true;
+                cpu.AddressData = cpu.Mem.Read(cpu.GetRegister(cpu.Inst.RegOne));
+                //fixme 22/08/17: cycles
             });
             Handlers.Add(AddressMode.D16, RD16_D16);
             Handlers.Add(AddressMode.R_D16, RD16_D16);
@@ -63,9 +107,13 @@ namespace GBCS.GB
             //fixme 22/08/14: Cycles
             byte hi = cpu.Mem.Read((ushort)(cpu.Pc + 1));
             //fixme 22/08/14: Cycles
+
+
             cpu.MemDest = (ushort)(lo | (hi << 8));
+
             cpu.PcIsMemDest = true;
             cpu.Pc += 2;
+
             cpu.AddressData = cpu.GetRegister(cpu.Inst.RegTwo);
         }
 
