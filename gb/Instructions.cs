@@ -234,7 +234,7 @@ namespace GBCS.GB
             Insts.Add(0xD2, IBuilder.Type(InstructionType.JP).Addr(AddressMode.D16).Cond(ConditionType.NC).Ret());
             Insts.Add(0xD4, IBuilder.Type(InstructionType.CALL).Addr(AddressMode.D16).Cond(ConditionType.NC).Ret());
             Insts.Add(0xD5, IBuilder.Type(InstructionType.PUSH).One(RegisterType.DE).Ret());
-            Insts.Add(0xD6, IBuilder.Type(InstructionType.SUB).Addr(AddressMode.R_D8).Ret());
+            Insts.Add(0xD6, IBuilder.Type(InstructionType.SUB).Addr(AddressMode.R_D8).One(RegisterType.A).Ret());
             Insts.Add(0xD7, IBuilder.Type(InstructionType.RST).Param(0x10).Ret());
             Insts.Add(0xD8, IBuilder.Type(InstructionType.RET).Cond(ConditionType.C).Ret());
             Insts.Add(0xD9, IBuilder.Type(InstructionType.RETI).Ret());
@@ -247,12 +247,12 @@ namespace GBCS.GB
             Insts.Add(0xE1, IBuilder.Type(InstructionType.POP).One(RegisterType.HL).Ret());
             Insts.Add(0xE2, IBuilder.Type(InstructionType.LD).Addr(AddressMode.MR_R).One(RegisterType.C).Two(RegisterType.A).Ret());
             Insts.Add(0xE5, IBuilder.Type(InstructionType.PUSH).One(RegisterType.HL).Ret());
-            Insts.Add(0xE6, IBuilder.Type(InstructionType.AND).Addr(AddressMode.D8).Ret());
+            Insts.Add(0xE6, IBuilder.Type(InstructionType.AND).Addr(AddressMode.R_D8).One(RegisterType.A).Ret());
             Insts.Add(0xE7, IBuilder.Type(InstructionType.RST).Param(0x20).Ret());
             Insts.Add(0xE8, IBuilder.Type(InstructionType.ADD).Addr(AddressMode.R_D8).One(RegisterType.SP).Ret());
-            Insts.Add(0xE9, IBuilder.Type(InstructionType.JP).Addr(AddressMode.MR).One(RegisterType.HL).Ret());
+            Insts.Add(0xE9, IBuilder.Type(InstructionType.JP).Addr(AddressMode.R).One(RegisterType.HL).Ret());
             Insts.Add(0xEA, IBuilder.Type(InstructionType.LD).Addr(AddressMode.A16_R).One(RegisterType.NONE).Two(RegisterType.A).Ret());
-            Insts.Add(0xEE, IBuilder.Type(InstructionType.XOR).Addr(AddressMode.D8).Ret());
+            Insts.Add(0xEE, IBuilder.Type(InstructionType.XOR).Addr(AddressMode.R_D8).One(RegisterType.A).Ret());
             Insts.Add(0xEF, IBuilder.Type(InstructionType.RST).Param(0x28).Ret());
 
             Insts.Add(0xF0, IBuilder.Type(InstructionType.LDH).Addr(AddressMode.R_A8).One(RegisterType.A).Ret());
@@ -260,12 +260,12 @@ namespace GBCS.GB
             Insts.Add(0xF1, IBuilder.Type(InstructionType.POP).One(RegisterType.AF).Ret());
             Insts.Add(0xF3, IBuilder.Type(InstructionType.DI).Ret());
             Insts.Add(0xF5, IBuilder.Type(InstructionType.PUSH).One(RegisterType.AF).Ret());
-            Insts.Add(0xF6, IBuilder.Type(InstructionType.OR).Addr(AddressMode.D8).Ret());
+            Insts.Add(0xF6, IBuilder.Type(InstructionType.OR).Addr(AddressMode.R_D8).One(RegisterType.A).Ret());
             Insts.Add(0xF8, IBuilder.Type(InstructionType.LD).Addr(AddressMode.HL_SPR).One(RegisterType.HL).Two(RegisterType.SP).Ret());
             Insts.Add(0xF9, IBuilder.Type(InstructionType.LD).Addr(AddressMode.R_R).One(RegisterType.SP).Two(RegisterType.HL).Ret());
             Insts.Add(0xFA, IBuilder.Type(InstructionType.LD).Addr(AddressMode.R_A16).One(RegisterType.A).Ret());
             Insts.Add(0xFB, IBuilder.Type(InstructionType.EI).Ret());
-            Insts.Add(0xFE, IBuilder.Type(InstructionType.CP).Addr(AddressMode.D8).Ret());
+            Insts.Add(0xFE, IBuilder.Type(InstructionType.CP).Addr(AddressMode.R_D8).One(RegisterType.A).Ret());
             Insts.Add(0xFF, IBuilder.Type(InstructionType.RST).Param(0x38).Ret());
         }
 
