@@ -22,11 +22,31 @@ namespace GBCS
 
             Buffer.BlockCopy(cartidge.ROM, 0, cpu.Mem.Memory, 0, 0x7FFF);
 
-            while (!cpu.WasHalted)
+            ushort breakAt = 0x0000;
+
+            if (args.Length == 2)
+            {
+                breakAt = ushort.Parse(args[1], System.Globalization.NumberStyles.HexNumber);
+            }
+
+            while (true)
             {
                 if (!cpu.Step())
                 {
+                    cpu.Stack.ToFile();
                     break;
+                }
+                if (breakAt != 0x0000)
+                {
+                    if (cpu.Pc == breakAt)
+                    {
+                        Console.WriteLine("> Break at: {0:X4}", breakAt);
+                        _ = cpu.Step();
+                        Console.WriteLine("> Inst: {0}, {1}, {2}, {3}, {4}", cpu.Inst.Type, cpu.Inst.Addr, cpu.Inst.RegOne, cpu.Inst.RegTwo, cpu.Inst.Cond);
+                        Console.WriteLine("> AddressData: {0:X4}", cpu.AddressData);
+                        cpu.Stack.ToFile();
+                        break;
+                    }
                 }
             }
         }
