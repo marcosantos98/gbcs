@@ -16,6 +16,11 @@ namespace GBCS.GB
             _writer.WriteLine(str, args);
         }
 
+        public void Clear()
+        {
+            _ = _writer.GetStringBuilder().Remove(0, _writer.GetStringBuilder().Length);
+        }
+
         public void ToFile()
         {
 

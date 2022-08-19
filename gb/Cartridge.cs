@@ -26,6 +26,11 @@ namespace GBCS.GB
             ROM = File.ReadAllBytes(romPath);
             //fixme 22/08/13: Check for errors;
 
+            if (ROM.Length == 0)
+            {
+                throw new Exception("ROM size is 0");
+            }
+
             //Fill info
             byte[] title = new byte[0x143 - 0x134];
             Buffer.BlockCopy(ROM, 0x134, title, 0, 0x143 - 0x134);

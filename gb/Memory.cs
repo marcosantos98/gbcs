@@ -2,14 +2,19 @@ namespace GBCS.GB
 {
     public class MemoryManager
     {
-
         public byte[] Memory = new byte[0xFFFF];
+        public byte[] Serial = new byte[2];
 
         private readonly CPU _cpu;
 
         public MemoryManager(CPU cpu)
         {
             _cpu = cpu;
+        }
+
+        public ushort ReadU16(ushort address)
+        {
+            return (ushort)(Read(address) | (Read((ushort)(address + 1)) << 8));
         }
 
         public byte Read(ushort address)
@@ -51,7 +56,17 @@ namespace GBCS.GB
             }
             else if (address < 0xFF80)
             {
-                //Console.WriteLine("Reading 0x{0:X4} from IO Registers.", address);
+                //_cpu.stack.LogLn("Reading 0x{0:X4} from IO Registers.", address);
+
+                if (address == 0xFF01)
+                {
+                    return Serial[0];
+                }
+                else if (address == 0xFF02)
+                {
+                    return Serial[1];
+                }
+
                 return Memory[address];
             }
             else if (address == 0xFFFF)
@@ -59,7 +74,8 @@ namespace GBCS.GB
                 //Console.WriteLine("Reading 0x{0:X4} from IE Register.", address);
                 return _cpu.IERegister;
             }
-            //Console.WriteLine("Reading 0x{0:X4} from High RAM.", address);
+
+            _cpu.Stack.LogLn("PC: {2:X4} Reading 0x{0:X4} from High RAM. {1:X2}", address, Memory[address], _cpu.Pc);
             return Memory[address]; //HIRAM
         }
 
@@ -67,8 +83,8 @@ namespace GBCS.GB
         {
             if (address < 0x8000)
             {
-                Console.WriteLine("Writing 0x{1:X2} to 0x{0:X4} from ROM.", address, value);
-                Environment.Exit(1);
+                //Console.WriteLine("\nWriting 0x{1:X2} to 0x{0:X4} from ROM.", address, value);
+                //Environment.Exit(1);
             }
             else if (address < 0xA000)
             {
@@ -88,7 +104,7 @@ namespace GBCS.GB
             else if (address < 0xFE00)
             {
                 Console.WriteLine("Writing 0x{1:X2} to 0x{0:X4} from ECHO RAM. Prohibited by NITENDO.", address, value);
-                Environment.Exit(1);
+                //Environment.Exit(1);
             }
             else if (address < 0xFEA0)
             {
@@ -97,12 +113,23 @@ namespace GBCS.GB
             }
             else if (address < 0xFF00)
             {
-                Console.WriteLine("Writing 0x{1:X2} to 0x{0:X4} from Reserved area. Prohibited by NITENDO.", address, value);
-                Environment.Exit(1);
+                Console.WriteLine("Writing 0x{1:X2} to 0x{0:X4} from Reserved area. Prohibited by NITENDO.", address,
+                    value);
+                //Environment.Exit(1);
             }
             else if (address < 0xFF80)
             {
-                //Console.WriteLine("Writing 0x{1:X2} to 0x{0:X4} from IO Registers.", address, value);
+                //_cpu.stack.LogLn("Writing 0x{1:X2} to 0x{0:X4} from IO Registers.", address, value);
+                if (address == 0xFF01)
+                {
+                    Serial[0] = value;
+                    return;
+                }
+                else if (address == 0xFF02)
+                {
+                    Serial[1] = value;
+                    return;
+                }
                 Memory[address] = value;
             }
             else if (address == 0xFFFF)
@@ -112,7 +139,7 @@ namespace GBCS.GB
             }
             else
             {
-                //Console.WriteLine("Writing 0x{1:X2} to 0x{0:X4} from High RAM.", address, value);
+                _cpu.Stack.LogLn("PC: {2:X4} Writing 0x{1:X2} to 0x{0:X4} from High RAM.", address, value, _cpu.Pc);
                 Memory[address] = value;
             }
         }

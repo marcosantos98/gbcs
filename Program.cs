@@ -1,56 +1,81 @@
 ﻿using GBCS.GB;
 
+using Raylib_cs;
+
 namespace GBCS
 {
-    internal class Program
+    internal static class Program
     {
         public static void Main(string[] args)
         {
             //fixme 22/08/14: Check args before using them lol
-            Cartidge cartidge = new(args[0]);
+            Cartidge cartridge = new(args[0]);
 
             Console.WriteLine("Cartridge Info:");
-            Console.WriteLine("\tTitle: {0}", cartidge.Info.Title);
-            Console.WriteLine("\tVersion: {0}", cartidge.Info.Version);
-            Console.WriteLine("\tROM Size: {0} Kb", cartidge.Info.ROMSize);
-            Console.WriteLine("\tRAM Size: {0}", cartidge.Info.RAMSize);
-            Console.WriteLine("\tCartridge Type: {0}", cartidge.Info.CartidgeType);
-            Console.WriteLine("\tChecksum: {0}", cartidge.Info.Checksum);
-            Console.WriteLine("\tHasValidChecksum: {0}", cartidge.HasValidChecksum);
+            Console.WriteLine("\tTitle: {0}", cartridge.Info.Title);
+            Console.WriteLine("\tVersion: {0}", cartridge.Info.Version);
+            Console.WriteLine("\tROM Size: {0} Kb", cartridge.Info.ROMSize);
+            Console.WriteLine("\tRAM Size: {0}", cartridge.Info.RAMSize);
+            Console.WriteLine("\tCartridge Type: {0}", cartridge.Info.CartidgeType);
+            Console.WriteLine("\tChecksum: {0}", cartridge.Info.Checksum);
+            Console.WriteLine("\tHasValidChecksum: {0}", cartridge.HasValidChecksum);
 
             CPU cpu = new();
 
-            Buffer.BlockCopy(cartidge.ROM, 0, cpu.Mem.Memory, 0, 0x7FFF);
+            Buffer.BlockCopy(cartridge.ROM, 0, cpu.Mem.Memory, 0, 0x7FFF);
 
-            ushort breakAt = 0x0000;
+            Raylib.InitWindow(800, 400, "GBCS: " + cartridge.Info.Title);
 
-            if (args.Length == 2)
-            {
-                breakAt = ushort.Parse(args[1], System.Globalization.NumberStyles.HexNumber);
-            }
+            StringWriter writer = new();
 
-            while (true)
+            while (!Raylib.WindowShouldClose())
             {
                 if (!cpu.Step())
                 {
-                    cpu.Stack.ToFile();
-                    break;
+                    continue;
                 }
-                if (breakAt != 0x0000)
+
+
+                if (cpu.Mem.Read(0xFF02) == 0x81)
                 {
-                    if (cpu.Pc == breakAt)
+                    char c = Convert.ToChar(cpu.Mem.Read(0xFF01));
+                    if (c == '\n')
                     {
-                        Console.WriteLine("> Break at: {0:X4}", breakAt);
+                        writer.Write("\n-");
+                    }
+                    else
+                    {
+                        writer.Write(c);
+                    }
+
+                    Console.WriteLine("Write: {0}", Convert.ToChar(cpu.Mem.Read(0xFF01)));
+                    cpu.Mem.Write(0xFF02, 0x0);
+                }
+
+                Raylib.DrawText(writer.ToString(), 10, 10, 24, Color.BLACK);
+
+
+                if (cpu.IsHalted)
+                {
+                    if (Raylib.IsKeyReleased(KeyboardKey.KEY_C))
+                    {
+                        cpu.IsHalted = false;
                         _ = cpu.Step();
-                        Console.WriteLine("> Inst: {0}, {1}, {2}, {3}, {4}", cpu.Inst.Type, cpu.Inst.Addr, cpu.Inst.RegOne, cpu.Inst.RegTwo, cpu.Inst.Cond);
-                        Console.WriteLine("> AddressData: {0:X4}", cpu.AddressData);
-                        cpu.Stack.ToFile();
-                        break;
+                        cpu.IsHalted = true;
+                    }
+                    else if (Raylib.IsKeyReleased(KeyboardKey.KEY_B))
+                    {
+                        cpu.IsHalted = false;
                     }
                 }
+
+                Raylib.BeginDrawing();
+                Raylib.ClearBackground(Color.RAYWHITE);
+                Raylib.EndDrawing();
             }
+
+
+            Raylib.CloseWindow();
         }
     }
 }
-
-

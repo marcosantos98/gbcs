@@ -1,23 +1,13 @@
-
 namespace GBCS.GB
 {
-    public class Instruction
+    public abstract class Instruction
     {
-        public InstructionType Type;
-        public AddressMode Addr;
-        public RegisterType RegOne;
-        public RegisterType RegTwo;
-        public ConditionType Cond;
-        public byte Param;
-
-        public Instruction(InstructionType type, AddressMode addr, RegisterType regOne, RegisterType regTwo, ConditionType cond, byte param)
+        protected readonly CPU _cpu;
+        protected Instruction(CPU cpu)
         {
-            Type = type;
-            Addr = addr;
-            RegOne = regOne;
-            RegTwo = regTwo;
-            Cond = cond;
-            Param = param;
+            _cpu = cpu;
         }
+
+        public abstract (bool, int) Run();
     }
 }
